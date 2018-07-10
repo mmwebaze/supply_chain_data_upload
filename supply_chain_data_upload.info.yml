@@ -1,0 +1,5 @@
+name: supply chain data upload
+type: module
+description: Processing submitted csv supply chain data
+core: 8.x
+package: Csv

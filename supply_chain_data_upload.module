@@ -1,0 +1,40 @@
+<?php
+use Drupal\Core\Entity\EntityInterface;
+use \Drupal\supply_chain_data_upload\util\Util;
+use \Drupal\Core\Form\FormStateInterface;
+/**
+ * Implements hook_entity_insert().
+ */
+function supply_chain_data_upload_entity_insert(EntityInterface $entity)
+{
+
+    if ($entity->bundle() == 'supply_chain_data_upload'){
+        $fid = $entity->field_upload->getValue();
+        //print_r(json_encode($fid[0]['target_id']).' ****');
+        $fileStorage = Drupal::service('entity_type.manager')->getStorage('file');
+        $fids = $fileStorage->getQuery()
+            ->condition('fid', $fid[0]['target_id'])->execute();
+        $files = $fileStorage->loadMultiple($fids);
+
+        $util = new Util();
+        foreach ($files as $file){
+            //print_r($file->getFileUri());
+
+            $util->createSupplyChainData($file->getFileUri());
+           // die('dfd');
+        }
+
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function supply_chain_data_upload_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+    if ($form_id == 'node_supply_chain_data_upload_form' || $form_id == 'node_supply_chain_data_upload_quick_node_clone_form'){
+        $form['status']['#default_value'] = false;
+        $form['status']['widget']['value']['#default_value'] = false;
+        $form['status']['#disabled'] = 'disabled';
+    }
+}
